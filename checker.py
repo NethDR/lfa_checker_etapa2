@@ -252,7 +252,9 @@ def run_test(test):
     reffile = os.path.join(TESTDIR, "ref", test[:-2] + "ref")
 
     # print(infile, outfile, reffile)
-
+    # delete output file from previous runs, if it exists
+    if os.path.isfile(outfile):
+        os.remove(outfile)
     if lang == "haskell":
         cmd = "./{} {} {}".format(EXEC, infile, outfile)
     else:
@@ -267,23 +269,23 @@ def run_test(test):
 
 
 if __name__ == "__main__":
-    if not (os.path.isfile(SRCFILE) and os.access(SRCFILE, os.R_OK)):
-        sys.stderr.write("{} unavailable or unreadable!\n".format(SRCFILE))
-        sys.exit(1)
-
-    if len(sys.argv) == 1:
-        sys.stderr.write("Language option should be python3 or haskell!\n".format(SRCFILE))
-        sys.exit(1)
-
     if len(sys.argv) == 1:
         sys.stderr.write("Language (python3 or haskell) must be specified\n")
         sys.exit(1)
-    else:
-        if sys.argv[1] != "python3" and sys.argv[1] != "haskell":
-            sys.stderr.write("Language must be either python3 or haskell\n")
-            sys.exit(1)
+    
+    if sys.argv[1] != "python3" and sys.argv[1] != "haskell":
+        sys.stderr.write("Language must be either python3 or haskell\n")
+        sys.exit(1)
 
     lang = sys.argv[1]
+
+    if lang == "haskell" and not (os.path.isfile(EXEC) and os.access(EXEC,os.X_OK)):
+        sys.stderr.write("{} unavailable or unreadable!\n".format(EXEC))
+        sys.exit(1)
+    
+    if lang == "python3" and not (os.path.isfile(SRCFILE) and os.access(SRCFILE,os.R_OK)):
+        sys.stderr.write("{} unavailable or unreadable!\n".format(SRCFILE))
+        sys.exit(1)
 
     tests = os.listdir(os.path.join(TESTDIR, "in"))
     tests.sort(key = lambda s : int(s.split('.')[1]))
